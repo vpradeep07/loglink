@@ -37,7 +37,7 @@ class admin {
 							<label for="gen_hash">Link Hash Key (required)</label>
 						</th>
 						<td>
-							<input type="password" name="gen_hash" id="gen_hash" class="regular-text"
+							<input type="text" name="gen_hash" id="gen_hash" class="regular-text"
 										value="<?php echo $this->plugin->opts('gen_hash'); ?>" />
 							<p class="description">
 								This alphanumeric key is used to secure your login links. You shouldn't change this after it's set, as all previously generated links will be invalid.
