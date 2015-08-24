@@ -34,11 +34,11 @@ class plugin {
 
 		$key  = $this->opts('gen_hash');
 		$time = time();
-		$data = base64_encode($uid . '-|-' . $time);
+		$data = base64_encode($uid);
 
-		$hash = hash_hmac('sha256', $data, $key);
+		$hash = hash_hmac('sha256', $uid, $key);
 
-		echo site_url('?'.__NAMESPACE__ . '=' . $data . '||' . $hash);
+		echo site_url('?'.__NAMESPACE__ . '=' . $uid . '||' . $hash);
 		exit();
 	}
 
@@ -51,18 +51,19 @@ class plugin {
 		$arr = explode('||', $raw);
 		if(count($arr) !== 2) return; // Invalid link
 
-		$data = $arr[0];
-		$data_arr = explode('-|-', base64_decode($data));
-		$uid = $data_arr[0];
-		$time = $data_arr[1];
-
-		$key = $this->opts('gen_hash');
-		$expires = $this->opts('link_duration');
+		$uid = $arr[0];
 		$hash = $arr[1];
+		$key = $this->opts('gen_hash');
 
-		$hashcheck = hash_hmac('sha256', $data, $key);
+		$hashcheck = hash_hmac('sha256', $uid, $key);
+		/*
+		echo 'arr[0]: ' . $arr[0];
+		echo '  uid: ' . $uid;
+		echo '  hash: ' . $hash;
+		echo '  hashcheck:' . $hashcheck;
+		*/
 
-		if($hash === $hashcheck && ((int)$time + $expires) >= time()) {
+		if($hash === $hashcheck) {
 			$this->do_login((int)$uid);
 
 			$url = apply_filters(__NAMESPACE__ . '_redirect_url', site_url());
