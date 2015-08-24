@@ -1,3 +1,6 @@
+This repo is a port of the original Loglink Wordpress plugin,
+available at https://wordpress.org/plugins/loglink/
+
 === Loglink ===
 Contributors: Code by Jinx
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=YS46UW6PLH286
