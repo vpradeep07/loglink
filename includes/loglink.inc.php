@@ -36,9 +36,13 @@ class plugin {
 		$time = time();
 		$data = base64_encode($uid);
 
-		$hash = hash_hmac('sha256', $uid, $key);
+		$this_user = get_user_by('id', $uid);
+		$this_email = $this_user->get('user_email');
+		$encoded_email = base64_encode($this_email);
 
-		echo site_url('?'.__NAMESPACE__ . '=' . $uid . '||' . $hash);
+		$hash = hash_hmac('sha256', $this_email, $key);
+
+		echo site_url('?'.__NAMESPACE__ . '=' . $encoded_email . '||' . $hash);
 		exit();
 	}
 
@@ -51,20 +55,24 @@ class plugin {
 		$arr = explode('||', $raw);
 		if(count($arr) !== 2) return; // Invalid link
 
-		$uid = $arr[0];
+		$encoded_email = $arr[0];
+		$email = base64_decode($encoded_email);
 		$hash = $arr[1];
 		$key = $this->opts('gen_hash');
 
-		$hashcheck = hash_hmac('sha256', $uid, $key);
+		$hashcheck = hash_hmac('sha256', $email, $key);
+
 		/*
 		echo 'arr[0]: ' . $arr[0];
 		echo '  uid: ' . $uid;
+                echo '  email: ' . $email;
 		echo '  hash: ' . $hash;
 		echo '  hashcheck:' . $hashcheck;
 		*/
 
+
 		if($hash === $hashcheck) {
-			$this->do_login((int)$uid);
+			$this->do_login($email);
 
 			$url = apply_filters(__NAMESPACE__ . '_redirect_url', site_url());
 
@@ -92,14 +100,14 @@ class plugin {
 		elseif($opt) return $returnable[$opt];
 	}
 
-	private function do_login($uid) {
-		$user = new \WP_User($uid);
-		if(!$user->exists()) return;
+	private function do_login($email) {
+		$user = get_user_by('email', $email);
+		if(!$user) return;
 
 		if(is_user_logged_in() && $this->opts('override_logins') === 'no') return;
 
-		wp_set_current_user($uid, $user->user_login);
-		wp_set_auth_cookie($uid);
+		wp_set_current_user($user->ID, $user->user_login);
+		wp_set_auth_cookie($user->ID);
 		do_action('wp_login', $user->user_login);
 	}
 }
